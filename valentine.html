@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset='UTF-8'/>
+    <meta content='width=device-width, initial-scale=1, user-scalable=1, minimum-scale=1, maximum-scale=5' name='viewport'/>
+    <title>Untukk Kamuu</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/typeit@8.7.0/dist/index.umd.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --ukuran-teks: 1.1rem;
+            --warna-aksen: #ff4d6d;
+            --gaya-font: 'Nunito Sans', sans-serif;
+            --gaya-font-judul: 'Dancing Script', cursive;
+            --transit: all .4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body { 
+            background-color: #000; font-family: var(--gaya-font); margin: 0; color: white;
+            overflow: hidden; touch-action: manipulation;
+        }
+
+        #bodyblur { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; }
+        #bodyblur img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; filter: brightness(0.5) blur(3px); transition: var(--transit); }
+
+        #Content { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--warna-aksen); }
+            50% { box-shadow: 0 0 20px var(--warna-aksen); }
+            100% { box-shadow: 0 0 5px var(--warna-aksen); }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px);
+            border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px; text-align: center; width: 85%; max-width: 400px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            animation: popIn 0.8s ease-out;
+            transition: var(--transit);
+        }
+
+        .gif-container { height: 140px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+        .gif-container img { width: 130px; height: 130px; border-radius: 20px; object-fit: contain; transition: var(--transit); }
+
+        .btn-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; }
+        
+        .btn-yes { 
+            padding: 12px 30px; border-radius: 50px; border: none; font-weight: bold; 
+            cursor: pointer; background: var(--warna-aksen); color: white;
+            animation: glow 2s infinite; transition: var(--transit);
+        }
+        .btn-yes:hover { transform: scale(1.1); }
+
+        .btn-no { 
+            padding: 12px 25px; border-radius: 50px; border: 1px solid white; background: transparent;
+            color: white; cursor: pointer; transition: 0.1s ease; /* Transisi lebih cepat agar responsif saat dikejar */
+        }
+
+        .lovein { font-size: 80px; color: var(--warna-aksen); cursor: pointer; transition: var(--transit); }
+        .lovein:hover { transform: scale(1.2); filter: drop-shadow(0 0 10px var(--warna-aksen)); }
+
+        #kalimat { 
+            font-size: var(--ukuran-teks); font-weight: 700; min-height: 100px; 
+            display: block; text-align: center; line-height: 1.6; padding: 0 10px;
+        }
+
+        .section-out { opacity: 0; transform: scale(0.9); pointer-events: none; transition: var(--transit); }
+        .section-in { animation: popIn 0.6s forwards; }
+
+        #loading-container, #game-container, #bq, #Tombol, #main-question { display: none; }
+        
+        /* FIX LOADING DESIGN */
+        .progress-box { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .progress-bar { width: 100%; height: 100%; background: var(--warna-aksen); animation: shrink 4s linear forwards; }
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px; }
+        .card { height: 65px; cursor: pointer; transition: var(--transit); }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .card-front { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); }
+        .card-back { background: var(--warna-aksen); transform: rotateY(180deg); color: white; }
+
+        #By { background: var(--warna-aksen); color: white; padding: 14px 35px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px; transition: var(--transit); box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3); }
+
+        .fa-heart-falling { color: var(--warna-aksen); position: fixed; top: -20px; animation: fall linear forwards; pointer-events: none; z-index: 100; opacity: 0.7; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        .watermark { position: fixed; bottom: 20px; width: 100%; text-align: center; font-size: 0.75rem; color: rgba(255, 255, 255, 0.3); font-weight: bold; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+    <audio src="https://ik.imagekit.io/srfdvvkga/A%20Thousand%20Years.mp3" id="linkmp3" loop></audio>
+    <div id="bodyblur"><img id="bgImg" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=1910" /></div>
+
+    <div id="Content">
+        <div class="glass" id="mainGlass">
+            <div class="gif-container" id="containerGif">
+                <img id="mainGif" src="" alt="Valentine Gif">
+            </div>
+
+            <div id="loveIn" class="section-in" onclick="tanya()">
+                <i class="fa-solid fa-heart lovein"></i>
+                <p style="margin-top: 15px; font-weight: bold; opacity: 0.8;">Ketuk Hati Ini ✨</p>
+            </div>
+
+            <div id="main-question">
+                <h2 style="font-family: var(--gaya-font-judul); margin:0; font-size: 2rem;">Halo Sayang... ❤️</h2>
+                <p style="opacity: 0.9;">Aku punya kejutan kecil buat kamu, mau lihat?</p>
+                <div class="btn-container">
+                    <button class="btn-yes" onclick="mulai()">Mau Banget!</button>
+                    <button class="btn-no" id="btnNo" onmouseover="moveButton()" onclick="moveButton()">Maluu Ahh</button>
+                </div>
+            </div>
+
+            <div id="loading-container">
+                <p style="font-weight: bold; letter-spacing: 1px;">Tungguuu Yaaa...</p>
+                <div class="progress-box"><div class="progress-bar"></div></div>
+            </div>
+
+            <div id="game-container">
+                <p style="font-weight: bold; margin-bottom: 5px;">Cari Emoji Yang Samaa Yukkk</p>
+                <div class="grid" id="grid"></div>
+            </div>
+
+            <div id="bq">
+                <div id="kalimat"></div>
+                <div id="Tombol" style="display:none; animation: popIn 0.8s forwards;">
+                    <a href="#" id="By" onclick="balas()">💌 Balas ke WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="watermark">Dibuat dengan 🤍 oleh Farel Alfareza</div>
+
+    <script>
+        const audio = document.getElementById('linkmp3');
+        const mainGlass = document.getElementById('mainGlass');
+        const mainGif = document.getElementById('mainGif');
+        const btnNo = document.getElementById('btnNo');
+
+        const gifArray = [
+            "https://media.tenor.com/-Qq0R9rKNzUAAAAi/panda-bear.gif", 
+            "https://media.tenor.com/-aW73OVUtyYAAAAi/tkthao219-bubududu.gif", 
+            "https://media.tenor.com/jkVthFR60pgAAAAi/feliz-cumplea%C3%B1os.gif", 
+            "https://media.tenor.com/q_zo_A3taR0AAAAi/tkthao219-bubududu.gif" 
+        ];
+
+        function setGif(index) {
+            mainGif.style.transform = "scale(0)";
+            setTimeout(() => {
+                mainGif.src = gifArray[index];
+                mainGif.style.transform = "scale(1)";
+            }, 300);
+        }
+
+        setGif(0);
+
+        function showSection(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+            hideEl.classList.add('section-out');
+            setTimeout(() => {
+                hideEl.style.display = "none";
+                showEl.style.display = "block";
+                showEl.classList.add('section-in');
+            }, 400);
+        }
+
+        function tanya() {
+            setGif(1);
+            showSection('loveIn', 'main-question');
+            audio.play().catch(() => {});
+        }
+
+        // --- FUNGSI FIX TOMBOL PINDAH ---
+        function moveButton() {
+            // 1. Ambil ukuran layar/viewport
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // 2. Ambil ukuran tombol itu sendiri
+            const btnWidth = btnNo.offsetWidth;
+            const btnHeight = btnNo.offsetHeight;
+
+            // 3. Tentukan batas maksimal agar tidak keluar (dikurangi margin aman 10px)
+            const maxX = windowWidth - btnWidth - 10;
+            const maxY = windowHeight - btnHeight - 10;
+
+            // 4. Hitung posisi acak di dalam rentang 10px s/d maxX
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+            // 5. Terapkan posisi
+            btnNo.style.position = "fixed";
+            btnNo.style.zIndex = "999";
+            btnNo.style.left = randomX + "px";
+            btnNo.style.top = randomY + "px";
+        }
+
+        function mulai() {
+            document.getElementById('containerGif').style.opacity = "0";
+            showSection('main-question', 'loading-container');
+            
+            setTimeout(() => {
+                document.getElementById('loading-container').classList.add('section-out');
+                setTimeout(() => {
+                    document.getElementById('loading-container').style.display = "none";
+                    document.getElementById('containerGif').style.opacity = "1";
+                    setGif(2);
+                    initGame();
+                }, 400);
+            }, 4000);
+        }
+
+        const emojis = ['❤️', '🍫', '🌹', '💎', '🍭', '🎀', '❤️', '🍫', '🌹', '💎', '🍭', '🎀'];
+        let flippedCards = [];
+        let matchedCount = 0;
+
+        function initGame() {
+            const gameCont = document.getElementById('game-container');
+            gameCont.style.display = "block";
+            const grid = document.getElementById('grid');
+            grid.innerHTML = "";
+            const shuffled = [...emojis].sort(() => Math.random() - 0.5);
+            shuffled.forEach((emoji) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.emoji = emoji;
+                card.innerHTML = `<div class="card-inner"><div class="card-front"><i class="fa-solid fa-star"></i></div><div class="card-back">${emoji}</div></div>`;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
+                this.classList.add('flipped');
+                flippedCards.push(this);
+                if (flippedCards.length === 2) setTimeout(checkMatch, 600);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                matchedCount += 2;
+                if (matchedCount === emojis.length) {
+                    setTimeout(() => {
+                        setGif(3);
+                        showSection('game-container', 'bq');
+                        startTyping();
+                        setInterval(createHeart, 300);
+                    }, 500);
+                }
+            } else {
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+            }
+            flippedCards = [];
+        }
+
+        function startTyping() {
+            new TypeIt("#kalimat", {
+                speed: 50,
+                waitUntilVisible: true,
+                cursor: true,
+            })
+            .type("Yeay! Misinya akhirnya selesai... ✨")
+            .pause(1000)
+            .delete()
+            .type("Selamat Hari Valentine, Sayang! ❤️")
+            .pause(1200)
+            .delete()
+            .type("Terima kasih ya sudah hadir di hidupku.")
+            .pause(1000)
+            .delete()
+            .type("Kamu adalah alasan kenapa setiap hariku terasa lebih indah.")
+            .pause(1000)
+            .delete()
+            .type("Mungkin aku nggak sempurna, tapi cintaku tulus buat kamu.")
+            .pause(1000)
+            .delete()
+            .type("Aku janji akan selalu ada di sampingmu, dalam suka maupun duka.")
+            .pause(1200)
+            .delete() 
+            .type("<strong>Tetap jadi milikku selamanya ya? I Love You More!</strong> 🌹")
+            .pause(1000)
+            .exec(() => {
+                document.getElementById('Tombol').style.display = "block";
+            })
+            .go();
+        }
+
+        function createHeart() {
+            const heart = document.createElement("i");
+            heart.className = "fa-solid fa-heart fa-heart-falling";
+            heart.style.left = Math.random() * 100 + "vw";
+            heart.style.animationDuration = Math.random() * 3 + 2 + "s";
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 5000);
+        }
+
+        function balas() {
+            window.location.href = "https://wa.me/?text=Makasih+ya+sayang+buat+kejutannya!+Aku+sayang+kamu+juga+banget+❤️";
+        }
+    </script>
+</body>
+</html>
