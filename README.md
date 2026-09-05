@@ -56,6 +56,6 @@ Untuk mengubah konten agar lebih personal:
 
 ---
 
-Dibuat dengan ❤️ oleh [fareldev-hub](https://www.google.com/search?q=https://github.com/tio-keren)
+Dibuat dengan ❤️ oleh [tio-keren](https://www.google.com/search?q=https://github.com/tio-keren)
 
 ---
